@@ -2,17 +2,37 @@ import { parse } from 'csv-parse';
 import { Readable } from 'node:stream';
 import { config } from './config.js';
 
-const SHAPES = {
-  'ELONGATED CUSHION': 'Elongated Cushion',
-  'CUSHION MODIFIED': 'Cushion',
-  'CUSHION BRILLIANT': 'Cushion',
-  'SQ EMERALD': 'Asscher',
-  'SQUARE EMERALD': 'Asscher',
-};
+// The supplier spells shapes ~80 ways. Group them by outline into the shapes customers search for.
+const KEEP = ['Round', 'Oval', 'Pear', 'Emerald', 'Cushion', 'Elongated Cushion', 'Princess', 'Marquise', 'Radiant', 'Heart',
+  'Asscher', 'Baguette', 'Trilliant', 'Old Mine', 'Half Moon', 'Lozenge', 'Trapezoid', 'Hexagonal', 'Moval', 'Kite', 'Shield', 'Rose'];
+const RULES = [
+  [/^(SQ|SQUARE)\W*(EMERALD|EM)\b/, 'Asscher'],
+  [/^(SQ|SQUARE)\W*RADI/, 'Radiant'],
+  [/OLD\W*M|OLDMINE|MINER/, 'Old Mine'],
+  [/^(L|LONG|EL|ELONG|ELONGATED)\W*CUSH|ELONGATED CUSHION|LONG CUSHION/, 'Elongated Cushion'],
+  [/MOVAL/, 'Moval'],
+  [/HEXA/, 'Hexagonal'],
+  [/BAGUETTE/, 'Baguette'],
+  [/TRILL|TRIANG/, 'Trilliant'],
+  [/HALF\W*MOON/, 'Half Moon'],
+  [/MARQ|^MQ\b|\bMQ$/, 'Marquise'],
+  [/PEAR/, 'Pear'],
+  [/OVAL/, 'Oval'],
+  [/CUSH/, 'Cushion'],
+  [/EMERALD/, 'Emerald'],
+  [/RADI/, 'Radiant'],
+  [/PRINCESS/, 'Princess'],
+  [/HEART/, 'Heart'],
+  [/ASSCHER/, 'Asscher'],
+  [/ROUND|^RD$|^BR$|PORTUG|EURO/, 'Round'],
+];
 const title = (s) => s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
-const normShape = (s) => {
+export const normShape = (s) => {
   const u = (s || '').trim().toUpperCase();
-  return SHAPES[u] || title(u);
+  const t = title(u);
+  if (KEEP.includes(t)) return t;
+  for (const [re, name] of RULES) if (re.test(u)) return name;
+  return 'Other Fancy';
 };
 const grade = (s) => {
   const u = (s || '').trim().toUpperCase();

@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: edee-diamond-feed
+    runtime: node
+    plan: starter
+    region: singapore
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: FEED_URL
+        sync: false
+      - key: SHOPIFY_CLIENT_ID
+        sync: false
+      - key: SHOPIFY_CLIENT_SECRET
+        sync: false
+      - key: SHOPIFY_SHOP
+        value: u1us8c-vw.myshopify.com
+      - key: MARKUP
+        value: "2"
+      - key: EXTRA_AUD
+        value: "0"
+      - key: FX_BUFFER
+        value: "0"
+      - key: MIN_CARAT
+        value: "0.3"
+      - key: COLOURS
+        value: D,E,F,G,H
+      - key: LABS
+        value: IGI,GIA
+      - key: REQUIRE_PHOTO
+        value: "true"
+      - key: REFRESH_MINUTES
+        value: "15,45"
+      - key: ALLOWED_ORIGINS
+        value: https://edeeinfinity.com,https://www.edeeinfinity.com

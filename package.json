@@ -1,0 +1,17 @@
+{
+  "name": "edee-diamond-feed",
+  "version": "1.0.0",
+  "description": "Edee Infinity loose diamond feed: pulls supplier CSV at :15/:45, prices it, serves search + cart API",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node test/run.js"
+  },
+  "dependencies": {
+    "csv-parse": "^5.6.0"
+  },
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  }
+}

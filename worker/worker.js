@@ -41,7 +41,11 @@ async function getToken(env) {
   const raw = await res.text();
   let j = {};
   try { j = JSON.parse(raw); } catch {}
-  if (!res.ok || !j.access_token) throw new Error(`Shopify token error ${res.status}: ${raw.replace(/\s+/g, ' ').slice(0, 300)}`);
+  if (!res.ok || !j.access_token) {
+    const text = raw.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const at = Math.max(0, text.search(/error|invalid|not permitted|oauth/i) - 40);
+    throw new Error(`Shopify token error ${res.status}: ${text.slice(at, at + 300)}`);
+  }
   token = j.access_token;
   tokenExpires = Date.now() + (Number(j.expires_in) || 3600) * 1000;
   return token;

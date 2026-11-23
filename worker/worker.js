@@ -38,11 +38,10 @@ async function getToken(env) {
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ grant_type: 'client_credentials', client_id: env.SHOPIFY_CLIENT_ID, client_secret: env.SHOPIFY_CLIENT_SECRET }),
   });
-  const j = await res.json().catch(() => ({}));
-  if (!res.ok || !j.access_token) {
-    const why = [j.error, j.error_description, j.errors].filter(Boolean).map((x) => (typeof x === 'string' ? x : JSON.stringify(x))).join(' / ');
-    throw new Error(`Shopify token error ${res.status}${why ? ': ' + why.slice(0, 200) : ''}`);
-  }
+  const raw = await res.text();
+  let j = {};
+  try { j = JSON.parse(raw); } catch {}
+  if (!res.ok || !j.access_token) throw new Error(`Shopify token error ${res.status}: ${raw.replace(/\s+/g, ' ').slice(0, 300)}`);
   token = j.access_token;
   tokenExpires = Date.now() + (Number(j.expires_in) || 3600) * 1000;
   return token;

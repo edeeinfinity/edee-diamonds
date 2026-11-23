@@ -121,13 +121,13 @@
         <div>
           <span class="eds__label">Colour</span>
           <div class="eds__chips" data-multi="colour">
-            {%- for c in 'D,E,F,G,H' | split: ',' -%}<button type="button" class="eds__chip" aria-pressed="false" data-v="{{ c }}">{{ c }}</button>{%- endfor -%}
+            {%- assign opts = 'D,E,F,G,H' | split: ',' -%}{%- for c in opts -%}<button type="button" class="eds__chip" aria-pressed="false" data-v="{{ c }}">{{ c }}</button>{%- endfor -%}
           </div>
         </div>
         <div>
           <span class="eds__label">Clarity</span>
           <div class="eds__chips" data-multi="clarity">
-            {%- for c in 'FL,IF,VVS1,VVS2,VS1,VS2,SI1,SI2' | split: ',' -%}<button type="button" class="eds__chip eds__chip--sm" aria-pressed="false" data-v="{{ c }}">{{ c }}</button>{%- endfor -%}
+            {%- assign opts = 'FL,IF,VVS1,VVS2,VS1,VS2,SI1,SI2' | split: ',' -%}{%- for c in opts -%}<button type="button" class="eds__chip eds__chip--sm" aria-pressed="false" data-v="{{ c }}">{{ c }}</button>{%- endfor -%}
           </div>
         </div>
       </div>
@@ -136,7 +136,7 @@
         <div>
           <span class="eds__label">Cut</span>
           <div class="eds__chips" data-multi="cut">
-            {%- for c in 'Ideal,Excellent,Very Good' | split: ',' -%}<button type="button" class="eds__chip eds__chip--sm" aria-pressed="false" data-v="{{ c }}">{{ c }}</button>{%- endfor -%}
+            {%- assign opts = 'Ideal,Excellent,Very Good' | split: ',' -%}{%- for c in opts -%}<button type="button" class="eds__chip eds__chip--sm" aria-pressed="false" data-v="{{ c }}">{{ c }}</button>{%- endfor -%}
           </div>
         </div>
         <div>

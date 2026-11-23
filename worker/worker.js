@@ -36,7 +36,7 @@ async function getToken(env) {
   const res = await fetch(`https://${env.SHOPIFY_SHOP}/admin/oauth/access_token`, {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'client_credentials', client_id: env.SHOPIFY_CLIENT_ID, client_secret: env.SHOPIFY_CLIENT_SECRET }),
+    body: new URLSearchParams({ grant_type: 'client_credentials', client_id: String(env.SHOPIFY_CLIENT_ID || '').trim(), client_secret: String(env.SHOPIFY_CLIENT_SECRET || '').trim() }),
   });
   const raw = await res.text();
   let j = {};

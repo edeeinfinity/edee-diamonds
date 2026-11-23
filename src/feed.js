@@ -21,6 +21,13 @@ const grade = (s) => {
 const growth = (s) => (/cvd/i.test(s || '') ? 'CVD' : /hpht/i.test(s || '') ? 'HPHT' : '');
 const truthy = (s) => /^(true|1|yes)$/i.test((s || '').trim());
 
+// Which detail file a stone lives in. The same function is used by the website and the cart worker.
+export function bucketOf(id, n = 64) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (Math.imul(h, 31) + id.charCodeAt(i)) >>> 0;
+  return h % n;
+}
+
 export function certUrl(lab, cert) {
   if (!cert) return '';
   if (lab === 'GIA') return `https://www.gia.edu/report-check?reportno=${encodeURIComponent(cert)}`;

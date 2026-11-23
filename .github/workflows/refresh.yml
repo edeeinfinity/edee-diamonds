@@ -1,0 +1,60 @@
+name: Refresh diamond list
+
+on:
+  schedule:
+    - cron: '15,45 * * * *'   # supplier updates on the hour and half hour; we pull 15 min later (UTC, same minutes everywhere)
+  workflow_dispatch: {}        # "Run workflow" button for a manual refresh
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: diamond-refresh
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build diamond list from supplier feed
+        run: node scripts/build.js
+        env:
+          FEED_URL: ${{ secrets.FEED_URL }}
+          MARKUP: ${{ vars.MARKUP }}
+          EXTRA_AUD: ${{ vars.EXTRA_AUD }}
+          FX_BUFFER: ${{ vars.FX_BUFFER }}
+          MIN_CARAT: ${{ vars.MIN_CARAT }}
+          COLOURS: ${{ vars.COLOURS }}
+          LABS: ${{ vars.LABS }}
+          REQUIRE_PHOTO: ${{ vars.REQUIRE_PHOTO }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      # GitHub pauses scheduled workflows after 60 days without commits; touch a file once a month to prevent that.
+      - name: Keep the schedule alive
+        run: |
+          last=$(git log -1 --format=%ct)
+          if [ $(( $(date +%s) - last )) -gt 2592000 ]; then
+            date -u +%FT%TZ > .github/last-keepalive
+            git config user.name "edee-bot"; git config user.email "info@edeeinfinity.com"
+            git add .github/last-keepalive && git commit -m "Keep diamond refresh schedule alive" && git push
+          fi
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

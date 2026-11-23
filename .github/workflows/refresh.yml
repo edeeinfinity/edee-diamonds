@@ -31,6 +31,7 @@ jobs:
           FEED_URL: ${{ secrets.FEED_URL }}
           MARKUP: ${{ vars.MARKUP }}
           EXTRA_AUD: ${{ vars.EXTRA_AUD }}
+          MIN_PRICE: ${{ vars.MIN_PRICE }}
           FX_BUFFER: ${{ vars.FX_BUFFER }}
           MIN_CARAT: ${{ vars.MIN_CARAT }}
           COLOURS: ${{ vars.COLOURS }}

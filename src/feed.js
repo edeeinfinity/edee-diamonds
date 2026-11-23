@@ -56,7 +56,7 @@ export function certUrl(lab, cert) {
 
 export function retailAud(usd, fx) {
   const raw = usd * fx * (1 + config.fxBuffer) * config.markup + config.extraAud;
-  return Math.ceil(raw / config.roundTo) * config.roundTo;
+  return Math.max(Math.ceil(raw / config.roundTo) * config.roundTo, config.minPrice);
 }
 
 // Turn one supplier row into a public stone (no supplier price) or null if it shouldn't be shown.

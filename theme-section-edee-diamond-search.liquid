@@ -356,7 +356,7 @@
     $('[data-info]').innerHTML =
       '<p class="eds__kicker">Certified lab-grown diamond</p>' +
       '<h2 class="eds__h1" style="font-size:34px">' + esc(titleOf(d)) + '</h2>' +
-      '<div class="eds__bigprice">' + money.format(d.price) + '</div><div class="eds__gst">AUD, includes GST and insured delivery</div>' +
+      '<div class="eds__bigprice">' + money.format(d.price) + '</div><div class="eds__gst">AUD, includes GST and insured delivery · arrives in about 2–3 weeks</div>' +
       '<dl class="eds__dl">' + row('Colour', d.colour) + row('Clarity', d.clarity) + row('Cut', d.cut) + row('Polish', d.polish) + row('Symmetry', d.symmetry) +
         row('Fluorescence', d.fluorescence) + row('Measurements (mm)', d.measurements) + row('Depth / Table', d.depth && d.table ? d.depth + '% / ' + d.table + '%' : '') +
         row('Growth', d.growth) + row('Certificate', d.cert ? d.lab + ' ' + d.cert : '') + '</dl>' +
@@ -364,7 +364,7 @@
       '<div class="eds__acts"><button type="button" class="eds__btn" data-add="' + esc(d.id) + '">Add to cart</button>' +
       '<a class="eds__btn eds__btn--ghost" href="' + esc(CONSULT) + '?diamond=' + encodeURIComponent(d.lab + ' ' + (d.cert || d.id)) + '">Set it in a ring</a></div>' +
       '<div class="eds__msg" role="alert" data-msg></div>' +
-      '<p class="eds__note">Live inventory from our cutting partner, refreshed every 30 minutes. We confirm the stone within 24 hours of your order; if it has just sold, we will offer a matching alternative or a full refund.</p>';
+      '<p class="eds__note">Live inventory from our cutting partner in India, refreshed every 30 minutes. Each stone is shipped to us fully insured, so please allow about 2–3 weeks for delivery. We confirm the stone within 24 hours of your order; if it has just sold, we will offer a matching alternative or a full refund.</p>';
     $('[data-dlg]').showModal();
   }
 
@@ -403,7 +403,7 @@
     { "type": "textarea", "id": "intro", "label": "Intro", "default": "Search thousands of IGI and GIA certified lab-grown diamonds, updated every 30 minutes. Buy a stone loose, or have it set in a ring, pendant or earrings made for you." },
     { "type": "range", "id": "per_page", "label": "Diamonds per load", "min": 12, "max": 48, "step": 4, "default": 24 },
     { "type": "text", "id": "consult_url", "label": "'Set it in a ring' link", "default": "/pages/contact" },
-    { "type": "textarea", "id": "note", "label": "Note under results", "default": "Prices are in Australian dollars and include GST and insured delivery. Every diamond comes with its original IGI or GIA report." }
+    { "type": "textarea", "id": "note", "label": "Note under results", "default": "Prices are in Australian dollars and include GST and fully insured delivery, usually 2–3 weeks as each stone is shipped from our cutting partner in India. Every diamond comes with its original IGI or GIA report." }
   ],
   "presets": [ { "name": "Edee diamond search" } ]
 }

@@ -12,13 +12,14 @@ Free setup that powers the **Loose Diamonds** page on edeeinfinity.com.
 IGI or GIA certified, colour D–H, 0.30 ct and up, status *Available* or *In Stock*, with a working photo.
 
 ## Price customers see (AUD, incl. GST)
-`supplier USD × USD→AUD (European Central Bank rate, via frankfurter.app) × MARKUP + EXTRA_AUD`, rounded up to the next $10.
+`supplier USD × USD→AUD (European Central Bank rate, via frankfurter.app) × MARKUP + EXTRA_AUD` (insured shipping from India),
+rounded up to the next $10 and never below `MIN_PRICE`.
 The supplier's prices and the feed link are never published.
 
 ## Changing settings
 GitHub → this repo → **Settings → Secrets and variables → Actions**
 - Secret `FEED_URL`: the supplier's private CSV link.
-- Variables (optional; defaults in brackets): `MARKUP` (2), `EXTRA_AUD` (0), `FX_BUFFER` (0, e.g. 0.02 = +2%), `MIN_CARAT` (0.3), `COLOURS` (D,E,F,G,H), `LABS` (IGI,GIA), `REQUIRE_PHOTO` (true).
+- Variables (optional; defaults in brackets): `MARKUP` (2), `EXTRA_AUD` (80), `MIN_PRICE` (0), `FX_BUFFER` (0, e.g. 0.02 = +2%), `MIN_CARAT` (0.3), `COLOURS` (D,E,F,G,H), `LABS` (IGI,GIA), `REQUIRE_PHOTO` (true).
 
 A change applies at the next refresh. To refresh now: **Actions → Refresh diamond list → Run workflow**.
 

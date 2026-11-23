@@ -78,7 +78,7 @@ function describe(s) {
     ['Polish', s.polish], ['Symmetry', s.symmetry], ['Fluorescence', s.fluorescence], ['Measurements (mm)', s.measurements],
     ['Growth', s.growth], ['Certificate', `${s.lab} ${s.cert}`],
   ].filter((r) => r[1]);
-  return `<p>Certified lab-grown diamond. We confirm this stone with our cutting partner within 24 hours of your order; if it has sold, we will offer a matching alternative or a full refund.</p>
+  return `<p>Certified lab-grown diamond, delivered fully insured in about 2–3 weeks (each stone is shipped to us from our cutting partner in India). We confirm this stone within 24 hours of your order; if it has sold, we will offer a matching alternative or a full refund.</p>
 <table>${rows.map(([k, v]) => `<tr><th>${k}</th><td>${escHtml(v)}</td></tr>`).join('')}</table>`;
 }
 

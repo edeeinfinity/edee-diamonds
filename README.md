@@ -19,7 +19,7 @@ The supplier's prices and the feed link are never published.
 ## Changing settings
 GitHub → this repo → **Settings → Secrets and variables → Actions**
 - Secret `FEED_URL`: the supplier's private CSV link.
-- Variables (optional; defaults in brackets): `MARKUP` (2), `EXTRA_AUD` (80), `MIN_PRICE` (0), `FX_BUFFER` (0, e.g. 0.02 = +2%), `MIN_CARAT` (0.3), `COLOURS` (D,E,F,G,H), `LABS` (IGI,GIA), `REQUIRE_PHOTO` (true).
+- Variables (optional; defaults in brackets): `MARKUP` (2), `EXTRA_AUD` (100), `MIN_PRICE` (0), `FX_BUFFER` (0, e.g. 0.02 = +2%), `MIN_CARAT` (0.3), `COLOURS` (D,E,F,G,H), `LABS` (IGI,GIA), `REQUIRE_PHOTO` (true).
 
 A change applies at the next refresh. To refresh now: **Actions → Refresh diamond list → Run workflow**.
 

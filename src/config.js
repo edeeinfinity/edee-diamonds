@@ -16,7 +16,7 @@ export const config = {
   // Pricing: retail AUD (incl. GST) = supplier USD x USD->AUD x MARKUP + EXTRA_AUD, rounded up to ROUND_TO,
   // and never below MIN_PRICE
   markup: num(process.env.MARKUP, 2),
-  extraAud: num(process.env.EXTRA_AUD, 80), // insured shipping India -> Australia, per stone
+  extraAud: num(process.env.EXTRA_AUD, 100), // insured shipping India -> Australia, per stone
   minPrice: num(process.env.MIN_PRICE, 0),
   fxBuffer: num(process.env.FX_BUFFER, 0), // 0.02 = add 2% to the exchange rate as a safety margin
   fxFallback: num(process.env.FX_FALLBACK, 1.55), // used only if the live rate can't be fetched

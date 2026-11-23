@@ -48,7 +48,7 @@ ok(!/_usd|finalPrice|pricePerCarat/.test(raw), 'no supplier price fields in publ
 const decode = (r) => ({ id: r[0], shape: meta.shapes[r[1]], carat: r[2], colour: meta.colours[r[3]], lab: meta.labs[r[6]], price: r[8], image: r[9] >= 0 ? meta.prefixes[r[9]] + r[10] : '' });
 const all = st.rows.map(decode);
 ok(all.every((s) => ['IGI', 'GIA'].includes(s.lab) && 'DEFGH'.includes(s.colour) && s.carat >= 0.3 && s.image), 'only IGI/GIA, D–H, ≥0.30 ct, with photo');
-ok(all.every((s) => s.price === Math.ceil((usd[s.id] * 1.5 * 2 + 80) / 10) * 10), 'every price = USD × 1.5 × 2 + A$80, rounded up to $10');
+ok(all.every((s) => s.price === Math.ceil((usd[s.id] * 1.5 * 2 + 100) / 10) * 10), 'every price = USD × 1.5 × 2 + A$100, rounded up to $10');
 ok(all.every((s) => s.image === `https://video.S360.services/imaged/${s.id}/still.jpg`), 'image URLs rebuild correctly');
 const one = all[0];
 const det = JSON.parse(await readFile(`${out}/d/${bucketOf(one.id)}.json`, 'utf8'))[one.id];

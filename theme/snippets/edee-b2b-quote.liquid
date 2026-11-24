@@ -1,0 +1,93 @@
+{%- comment -%}
+  Edee Infinity: "Request a B2B quote" on the cart page. Trade buyers add loose diamonds (or jewellery) to the
+  cart as usual, then send the cart to Edee through the store contact form instead of checking out.
+  The email arrives at the store's contact address with the cart lines (SKU = supplier stock ID, certificate).
+  Rendered from layout/theme.liquid on the cart template; script moves it under the cart.
+{%- endcomment -%}
+{%- if template.name == 'cart' and cart.item_count > 0 -%}
+  {%- capture edee_cart_lines -%}
+    {%- for item in cart.items -%}
+      {{ item.quantity }} × {{ item.product.title }}{% if item.variant.title != 'Default Title' %} ({{ item.variant.title }}){% endif %}{% if item.sku != blank %} | SKU {{ item.sku }}{% endif %}{% for p in item.properties %}{% assign k = p.first | slice: 0 %}{% unless k == '_' or p.last == blank %} | {{ p.first }}: {{ p.last }}{% endunless %}{% endfor %} | {{ item.final_line_price | money }}
+    {% endfor -%}
+    Cart total (retail): {{ cart.total_price | money }}
+  {%- endcapture -%}
+  <div id="edee-b2b" class="edee-b2b">
+    {%- form 'contact', id: 'edee-b2b-form', class: 'edee-b2b__form' -%}
+      {%- assign b2b_sent = false -%}
+      {%- if form.posted_successfully? -%}{%- assign b2b_sent = true -%}{%- endif -%}
+      <details {% if b2b_sent or form.errors %}open{% endif %}>
+        <summary>
+          <span class="edee-b2b__kicker">Trade &amp; business buyers</span>
+          <span class="edee-b2b__title">Request a B2B quote for this cart</span>
+        </summary>
+        {%- if b2b_sent -%}
+          <p class="edee-b2b__ok" role="status">Thank you. Your quote request has been sent, and we'll email your trade price within one business day.</p>
+        {%- else -%}
+          <p class="edee-b2b__intro">Jewellers, retailers and trade buyers: send us this cart and we'll reply within one business day with your B2B price. No payment is taken now, and stone availability is confirmed with our quote.</p>
+          {%- if form.errors -%}<div class="edee-b2b__err">{{ form.errors | default_errors }}</div>{%- endif -%}
+          <input type="hidden" name="contact[Enquiry]" value="B2B quote request">
+          <textarea name="contact[Cart]" hidden data-edee-cart-lines>{{ edee_cart_lines | strip }}</textarea>
+          <div class="edee-b2b__grid">
+            <label>Your name<input type="text" name="contact[name]" autocomplete="name" required></label>
+            <label>Business name<input type="text" name="contact[Business]" autocomplete="organization" required></label>
+            <label>ABN (optional)<input type="text" name="contact[ABN]" inputmode="numeric"></label>
+            <label>Email<input type="email" name="contact[email]" autocomplete="email" required></label>
+            <label>Phone<input type="tel" name="contact[phone]" autocomplete="tel"></label>
+            <label class="edee-b2b__full">Notes (quantities, deadlines, setting requirements)<textarea name="contact[body]" rows="3"></textarea></label>
+          </div>
+          <button type="submit" class="edee-b2b__btn">Request my B2B quote</button>
+        {%- endif -%}
+      </details>
+    {%- endform -%}
+  </div>
+  <style>
+    .edee-b2b { max-width: 1200px; margin: 8px auto 40px; padding: 0 16px; font-family: Jost, var(--font-body--family, sans-serif); }
+    .edee-b2b details { border: 1px solid rgba(201,166,107,.6); border-radius: 14px; background: #FAF6EE; color: #0F1419; padding: 18px 20px; }
+    .edee-b2b summary { cursor: pointer; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .edee-b2b summary::-webkit-details-marker { display: none; }
+    .edee-b2b__kicker { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: #9C7A43; }
+    .edee-b2b__title { font-size: 19px; font-weight: 500; }
+    .edee-b2b__title::after { content: " →"; color: #9C7A43; }
+    .edee-b2b details[open] .edee-b2b__title::after { content: ""; }
+    .edee-b2b__intro { margin: 12px 0 16px; line-height: 1.55; color: #4a525a; font-size: 14.5px; }
+    .edee-b2b__grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .edee-b2b__grid label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #4a525a; }
+    .edee-b2b__grid input, .edee-b2b__grid textarea { font: inherit; font-size: 15px; padding: 10px 12px; border: 1px solid #d8d1c4; border-radius: 10px; background: #fff; color: #0F1419; }
+    .edee-b2b__btn { margin-top: 14px; padding: 14px 26px; border: 0; background: #0F1419; color: #fff; font: inherit; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; }
+    .edee-b2b__ok { margin: 12px 0 0; color: #2E7D5B; font-weight: 500; }
+    .edee-b2b__err { margin: 8px 0 12px; color: #a33; }
+    @media (min-width: 750px) { .edee-b2b__grid { grid-template-columns: 1fr 1fr; } .edee-b2b__full { grid-column: 1 / -1; } }
+  </style>
+  <script>
+    (function () {
+      var box = document.getElementById('edee-b2b');
+      if (!box) return;
+      // place it directly under the cart (outside the section Horizon re-renders)
+      var btn = document.querySelector('main [name="checkout"]');
+      var sec = btn && btn.closest('.shopify-section');
+      if (sec) sec.insertAdjacentElement('afterend', box);
+      if (location.search.indexOf('contact_posted') > -1) box.scrollIntoView({ block: 'center' });
+      // refresh the cart lines just before sending, in case quantities changed without a reload
+      var form = box.querySelector('form');
+      var lines = box.querySelector('[data-edee-cart-lines]');
+      if (!form || !lines) return;
+      var sending = false;
+      form.addEventListener('submit', function (e) {
+        if (sending) return;
+        e.preventDefault();
+        var money = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' });
+        fetch((window.Shopify && Shopify.routes ? Shopify.routes.root : '/') + 'cart.js')
+          .then(function (r) { return r.json(); })
+          .then(function (c) {
+            lines.value = c.items.map(function (i) {
+              var props = Object.keys(i.properties || {}).filter(function (k) { return k.charAt(0) !== '_' && i.properties[k]; })
+                .map(function (k) { return ' | ' + k + ': ' + i.properties[k]; }).join('');
+              return i.quantity + ' × ' + i.product_title + (i.variant_title ? ' (' + i.variant_title + ')' : '') + (i.sku ? ' | SKU ' + i.sku : '') + props + ' | ' + money.format(i.final_line_price / 100);
+            }).join('\n') + '\nCart total (retail): ' + money.format(c.total_price / 100);
+          })
+          .catch(function () {})
+          .finally(function () { sending = true; form.submit(); });
+      });
+    })();
+  </script>
+{%- endif -%}

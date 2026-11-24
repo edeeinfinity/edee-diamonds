@@ -16,10 +16,20 @@
   .blog-post-item .blog-post-card__content h2, .blog-post-item .blog-post-card__content h3, .blog-post-item .blog-post-card__content h4,
   .blog-post-item .blog-post-card__title-link { font-size: 17px !important; line-height: 1.35 !important; }
   .blog-post-item .blog-post-card__content-text { font-size: 14px !important; line-height: 1.5 !important; }
+  .blog-post-item .blog-post-card__title-link .text-block, .blog-post-item .blog-post-card__title-link .h4 { font-size: 17px !important; line-height: 1.35 !important; }
+  @media (max-width: 749px) {
+    .blog-post-item .blog-post-card__title-link .text-block, .blog-post-item .blog-post-card__title-link .h4 { font-size: 15px !important; }
+    .blog-post-item .blog-post-card__content-text { font-size: 13px !important; }
+  }
 </style>
 {%- elsif template.name == 'article' -%}
 <style>
   [class*="__blog-post-image"] { display: flex !important; justify-content: center; }
   [class*="__blog-post-image"] img { width: auto !important; max-width: 100% !important; height: auto !important; max-height: 440px !important; object-fit: contain !important; margin: 0 auto; }
+</style>
+{%- elsif template.name == 'collection' -%}
+<style>
+  /* collection intro text runs the full width instead of a narrow 455px column */
+  main rte-formatter.text-block, main rte-formatter.text-block p { max-width: none !important; }
 </style>
 {%- endif -%}

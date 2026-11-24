@@ -16,6 +16,8 @@
   product-card .text-block p { text-align: center !important; font-size: 15px !important; line-height: 1.4 !important; }
   product-card product-price .price, product-card product-price .price * { font-size: 16px !important; font-weight: 500 !important; }
   product-card product-price > div { width: 100%; text-align: center !important; }
+  /* announcement bar: two lines on phones instead of three */
+  @media (max-width: 749px) { .announcement-bar__text { letter-spacing: .05em !important; font-size: 10.5px !important; line-height: 1.45 !important; } }
 </style>
 {%- if template.name == 'index' -%}
 <style>

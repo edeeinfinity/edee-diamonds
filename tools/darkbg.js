@@ -19,8 +19,8 @@
       last = 1e9; for (let y = h - 1; y >= 0; y--) { if (tmp[y * w + x]) last = y; if (last - y <= r) out[y * w + x] = 1; } }
     return out;
   }
-  window.edeeDark = async function (url, size) {
-    size = size || 1200;
+  window.edeeDark = async function (url, size, thr) {
+    size = size || 1200; thr = thr || 247;
     const blob = await (await fetch(url)).blob();
     const bmp = await createImageBitmap(blob);
     const s = Math.min(1, size / Math.max(bmp.width, bmp.height));
@@ -33,7 +33,7 @@
     // plain white background check: corners
     const corners = [0, w - 1, (h - 1) * w, n - 1, Math.floor(w / 2), (h - 1) * w + Math.floor(w / 2)];
     if (corners.some(i => mn[i] < 245)) return null;
-    const white = new Uint8Array(n); for (let i = 0; i < n; i++) white[i] = mn[i] >= 247 ? 1 : 0;
+    const white = new Uint8Array(n); for (let i = 0; i < n; i++) white[i] = mn[i] >= thr ? 1 : 0;
     // label white components; background = touching the border or large enclosed areas
     const lab = new Int32Array(n), stack = new Int32Array(n), bg = new Uint8Array(n);
     const minArea = 4000 * (w * h) / (1800 * 1800);
@@ -49,9 +49,13 @@
         if (y < h - 1 && white[q + w] && !lab[q + w]) { lab[q + w] = cur; stack[sp++] = q + w; } }
       if (border || area > minArea) for (const q of members) bg[q] = 1;
     }
-    const edge = dilate(bg, w, h, Math.max(2, Math.round(3 * w / 1800)));
+    // object = everything not background; soft alpha only in a thin band around the object outline,
+    // the rest of the background (including faint floor shadows) becomes fully transparent
+    const obj = new Uint8Array(n); for (let i = 0; i < n; i++) obj[i] = bg[i] ? 0 : 1;
+    const r = Math.max(2, Math.round(3 * w / 1800));
+    const edge = dilate(bg, w, h, r), halo = dilate(obj, w, h, r);
     const a = new Float32Array(n);
-    for (let i = 0; i < n; i++) a[i] = edge[i] ? Math.min(1, (255 - mn[i]) / 60) : 1;
+    for (let i = 0; i < n; i++) a[i] = !edge[i] ? 1 : (halo[i] ? Math.min(1, (255 - mn[i]) / 60) : 0);
     // light blur of alpha (3x3 binomial)
     const b = new Float32Array(n);
     for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x;

@@ -10,6 +10,8 @@
 //   SHOPIFY_CLIENT_ID      from the Shopify Dev Dashboard app                    (secret)
 //   SHOPIFY_CLIENT_SECRET  from the Shopify Dev Dashboard app                    (secret)
 //   PRODUCT_TTL_DAYS       7                                                     (plain text, optional)
+//   GH_TOKEN               GitHub fine-grained token, Actions: read & write on edee-diamonds (secret)
+// Cron triggers: 15,45 * * * * (refresh the diamond list) and 0 16 * * * (daily cleanup).
 
 const API_VERSION = '2025-07';
 let token = null, tokenExpires = 0, onlineStoreId = null;
@@ -127,6 +129,18 @@ async function findStone(env, id) {
   return b[id] || null;
 }
 
+async function triggerRefresh(env) {
+  if (!env.GH_TOKEN) throw new Error('GH_TOKEN not set');
+  const repo = env.GH_REPO || 'edeeinfinity/edee-diamonds';
+  const res = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/refresh.yml/dispatches`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${String(env.GH_TOKEN).trim()}`, accept: 'application/vnd.github+json', 'user-agent': 'edee-cart-worker', 'content-type': 'application/json' },
+    body: JSON.stringify({ ref: 'main' }),
+  });
+  if (res.status !== 204) throw new Error(`GitHub ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return 204;
+}
+
 async function cleanup(env) {
   const days = Number(env.PRODUCT_TTL_DAYS || 7);
   const before = new Date(Date.now() - days * 86400_000).toISOString();
@@ -165,6 +179,12 @@ export default {
     return json(404, { error: 'Not found' }, h);
   },
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(cleanup(env).then((n) => console.log(`Removed ${n} old diamond products`)).catch((e) => console.error('cleanup', e.message)));
+    if (event.cron === '0 16 * * *') {
+      ctx.waitUntil(cleanup(env).then((n) => console.log(`Removed ${n} old diamond products`)).catch((e) => console.error('cleanup', e.message)));
+      return;
+    }
+    // every 30 minutes (:15 and :45): ask GitHub to rebuild the diamond list right away
+    // (GitHub's own timer is kept as a backup but often runs late)
+    ctx.waitUntil(triggerRefresh(env).then((s) => console.log('refresh dispatch', s)).catch((e) => console.error('refresh', e.message)));
   },
 };

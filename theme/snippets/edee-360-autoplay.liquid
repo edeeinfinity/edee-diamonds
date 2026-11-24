@@ -1,0 +1,50 @@
+{%- comment -%}
+  Edee Infinity: 360° turntable videos on product pages play on their own (muted, looping, no controls),
+  like a spinning photo, as soon as the slide is in view. Applies to product videos whose alt text contains "360".
+  Rendered from layout/theme.liquid.
+{%- endcomment -%}
+{%- if template.name == 'product' -%}
+<style>
+  .edee-360-host { position: relative; }
+  .edee-360-host::after { content: "360°"; position: absolute; left: 14px; top: 14px; z-index: 3; padding: 5px 10px; border-radius: 999px;
+    background: rgba(15,20,25,.78); color: #fff; font: 500 12px/1 Jost, var(--font-body--family, sans-serif); letter-spacing: .12em; pointer-events: none; }
+  .edee-360-host video { background: #fff; }
+</style>
+<script>
+  (function () {
+    function arm(d) {
+      if (d.dataset.edee360) return;
+      var btn = d.querySelector('[ref="deferredMediaPlayButton"], .deferred-media__poster-button');
+      if (!btn || !/360/.test(btn.getAttribute('aria-label') || '')) return;
+      d.dataset.edee360 = '1';
+      var host = d.closest('.product-media') || d.parentElement;
+      host.classList.add('edee-360-host');
+      function setup(v) {
+        v.muted = true; v.loop = true; v.playsInline = true; v.controls = false;
+        v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.removeAttribute('controls');
+        var p = v.play(); if (p && p.catch) p.catch(function () {});
+      }
+      function start() {
+        var v = d.querySelector('video');
+        if (v) { setup(v); return; }
+        if (typeof d.showDeferredMedia === 'function') d.showDeferredMedia(); else btn.click();
+        var n = 0, t = setInterval(function () {
+          var vv = d.querySelector('video');
+          if (vv || ++n > 40) { clearInterval(t); if (vv) setup(vv); }
+        }, 100);
+      }
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          var v = d.querySelector('video');
+          if (e.isIntersecting && e.intersectionRatio > 0.5) start();
+          else if (v && !v.paused) v.pause();
+        });
+      }, { threshold: [0, 0.5, 0.75] });
+      io.observe(host);
+    }
+    function scan() { document.querySelectorAll('deferred-media').forEach(arm); }
+    scan();
+    new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
+  })();
+</script>
+{%- endif -%}

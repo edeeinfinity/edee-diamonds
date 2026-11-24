@@ -3,10 +3,20 @@
   - product rows (.edh-cards) and the Guides & inspiration carousel glide slowly sideways on their own, with no
     scroll bar; they pause while the shopper hovers, touches or tabs into them and can still be swiped/dragged.
   - the logo above "Our mission" shows the full EDEE INFINITY logo.
-  Rendered from layout/theme.liquid on the index template.
+  - main menu text one step larger on wide screens (all pages).
+  - product names and prices on the homepage rows are centred under the image.
+  Rendered from layout/theme.liquid.
 {%- endcomment -%}
+<style>
+  @media (min-width: 1200px) {
+    header .menu-list__link-title { font-size: 15px !important; letter-spacing: 1.5px !important; }
+  }
+</style>
 {%- if template.name == 'index' -%}
 <style>
+  .edh-card__title, .edh-card__price { text-align: center !important; }
+  .edh-card__title { font-size: 15px !important; line-height: 1.4; }
+  .edh-card__price { font-size: 15px !important; }
   .edh-mission__mark { width: 230px !important; max-width: 70vw; height: auto; opacity: 1 !important; margin: 0 auto 6px !important; }
   .edee-autoscroll { scroll-snap-type: none !important; scrollbar-width: none; }
   .edee-autoscroll::-webkit-scrollbar { display: none; }

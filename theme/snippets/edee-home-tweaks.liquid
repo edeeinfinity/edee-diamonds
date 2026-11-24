@@ -1,0 +1,57 @@
+{%- comment -%}
+  Edee Infinity homepage tweaks:
+  - product rows (.edh-cards) and the Guides & inspiration carousel glide slowly sideways on their own, with no
+    scroll bar; they pause while the shopper hovers, touches or tabs into them and can still be swiped/dragged.
+  - the logo above "Our mission" shows the full EDEE INFINITY logo.
+  Rendered from layout/theme.liquid on the index template.
+{%- endcomment -%}
+{%- if template.name == 'index' -%}
+<style>
+  .edh-mission__mark { width: 230px !important; max-width: 70vw; height: auto; opacity: 1 !important; margin: 0 auto 6px !important; }
+  .edee-autoscroll { scroll-snap-type: none !important; scrollbar-width: none; }
+  .edee-autoscroll::-webkit-scrollbar { display: none; }
+  [id$="__edee_guides"] .featured-blog-posts-card__image img, [id$="__edee_guides"] .resource-image img { aspect-ratio: 4 / 3; object-fit: cover; }
+  [id$="__edee_guides"] h4, [id$="__edee_guides"] .h4 { font-size: 16px !important; line-height: 1.35; }
+</style>
+<script>
+  (function () {
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var SPEED = 0.35; // px per frame (~21px/s)
+    function setup(el) {
+      if (el.dataset.edeeAuto || el.scrollWidth <= el.clientWidth + 8) return;
+      el.dataset.edeeAuto = '1';
+      // duplicate the items once so the row can loop seamlessly
+      var items = Array.prototype.slice.call(el.children);
+      items.forEach(function (c) { var d = c.cloneNode(true); d.setAttribute('aria-hidden', 'true'); d.setAttribute('inert', ''); d.dataset.edeeClone = '1'; el.appendChild(d); });
+      el.classList.add('edee-autoscroll');
+      var paused = false, resumeAt = 0, pos = el.scrollLeft, visible = true;
+      function pause() { paused = true; }
+      function resume(delay) { paused = false; resumeAt = performance.now() + (delay || 0); pos = el.scrollLeft; }
+      el.addEventListener('mouseenter', pause);
+      el.addEventListener('mouseleave', function () { resume(400); });
+      el.addEventListener('touchstart', pause, { passive: true });
+      el.addEventListener('touchend', function () { resume(2500); }, { passive: true });
+      el.addEventListener('focusin', pause);
+      el.addEventListener('focusout', function () { resume(1500); });
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }).observe(el);
+      function step(t) {
+        var half = el.scrollWidth / 2;
+        if (!paused && visible && t >= resumeAt) {
+          pos += SPEED;
+          if (pos >= half) pos -= half;
+          el.scrollLeft = pos;
+        } else if (paused) {
+          pos = el.scrollLeft;
+          if (pos >= half) { pos -= half; el.scrollLeft = pos; }
+        }
+        requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    function scan() {
+      document.querySelectorAll('.edh-cards').forEach(setup);
+    }
+    if (document.readyState === 'complete') scan(); else window.addEventListener('load', scan);
+  })();
+</script>
+{%- endif -%}

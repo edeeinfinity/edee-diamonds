@@ -1,5 +1,5 @@
 {%- comment -%}
-  Edee Infinity: on desktop, product cards for Edee Exclusive designs (handles ED…) fade to a dark-background
+  Edee Infinity: on desktop, product cards for Edee Exclusive (ED…) and supplier (DMJ…) designs fade to a dark-background
   version of the main render on hover. Dark images live in Files as edee-dark-<handle>.jpg (same render,
   background swapped to brand navy). Hidden on touch screens and once the shopper uses the card's arrows.
   Rendered from layout/theme.liquid.
@@ -23,7 +23,7 @@
       card.dataset.edeeDh = '1';
       var link = card.querySelector('a[href*="/products/"]');
       var m = link && link.pathname.match(/\/products\/([^\/?#]+)/);
-      if (!m || !/^ed[a-z]*\d/.test(m[1])) return;
+      if (!m || !/^(ed[a-z]*\d|dmj)/.test(m[1])) return;
       var host = card.querySelector('slideshow-container') || card.querySelector('.card-gallery');
       if (!host) return;
       var img = document.createElement('img');

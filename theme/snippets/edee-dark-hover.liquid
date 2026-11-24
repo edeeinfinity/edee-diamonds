@@ -1,0 +1,49 @@
+{%- comment -%}
+  Edee Infinity: on desktop, product cards for Edee Exclusive designs (handles ED…) fade to a dark-background
+  version of the main render on hover. Dark images live in Files as edee-dark-<handle>.jpg (same render,
+  background swapped to brand navy). Hidden on touch screens and once the shopper uses the card's arrows.
+  Rendered from layout/theme.liquid.
+{%- endcomment -%}
+{%- assign edee_files_base = 'edee-dark-base.jpg' | file_url | split: 'edee-dark-base.jpg' | first -%}
+<style>
+  @media (hover: hover) and (min-width: 750px) {
+    .edee-dh-host { position: relative; }
+    .edee-dark-hover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s ease; pointer-events: none; z-index: 2; }
+    product-card:hover .edee-dark-hover.is-ready { opacity: 1; }
+    .edee-dh-off .edee-dark-hover { opacity: 0 !important; }
+  }
+  @media (hover: none), (max-width: 749px) { .edee-dark-hover { display: none; } }
+</style>
+<script>
+  (function () {
+    if (!window.matchMedia || !matchMedia('(hover: hover) and (min-width: 750px)').matches) return;
+    var BASE = {{ edee_files_base | json }} || '/cdn/shop/files/';
+    function enhance(card) {
+      if (card.dataset.edeeDh) return;
+      card.dataset.edeeDh = '1';
+      var link = card.querySelector('a[href*="/products/"]');
+      var m = link && link.pathname.match(/\/products\/([^\/?#]+)/);
+      if (!m || !/^ed[a-z]*\d/.test(m[1])) return;
+      var host = card.querySelector('slideshow-container') || card.querySelector('.card-gallery');
+      if (!host) return;
+      var img = document.createElement('img');
+      img.className = 'edee-dark-hover'; img.alt = ''; img.decoding = 'async';
+      img.onload = function () { img.classList.add('is-ready'); };
+      img.onerror = function () { img.remove(); };
+      host.classList.add('edee-dh-host');
+      host.appendChild(img);
+      card.addEventListener('mouseenter', function () {
+        if (!img.src) img.src = BASE + 'edee-dark-' + m[1] + '.jpg?width=700';
+      });
+      card.addEventListener('mouseleave', function () { host.classList.remove('edee-dh-off'); });
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('button, slideshow-arrows, [ref="previous"], [ref="next"]')) host.classList.add('edee-dh-off');
+      }, true);
+    }
+    function scan(root) { (root.querySelectorAll ? root : document).querySelectorAll('product-card').forEach(enhance); }
+    scan(document);
+    new MutationObserver(function (ms) {
+      ms.forEach(function (mu) { mu.addedNodes.forEach(function (n) { if (n.nodeType === 1) { if (n.matches && n.matches('product-card')) enhance(n); else scan(n); } }); });
+    }).observe(document.body, { childList: true, subtree: true });
+  })();
+</script>

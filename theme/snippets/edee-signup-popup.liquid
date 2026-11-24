@@ -1,0 +1,96 @@
+{%- comment -%}
+  Edee Infinity: email signup popup with a 10% welcome code (WELCOME10, one use per customer, excludes loose diamonds).
+  Shows once after 15 seconds or half a page of scrolling; hidden for 30 days after closing. Not shown on cart,
+  account or password pages. Signups are saved as Shopify customers who accept email marketing.
+  Rendered from layout/theme.liquid.
+{%- endcomment -%}
+{%- liquid
+  assign hide_popup = false
+  if template.name == 'cart' or template.name == 'password' or template contains 'customers'
+    assign hide_popup = true
+  endif
+-%}
+{%- unless hide_popup -%}
+<div class="edsu" id="edee-signup" hidden>
+  <div class="edsu__scrim" data-edsu-close></div>
+  <div class="edsu__box" role="dialog" aria-modal="true" aria-labelledby="edsu-title">
+    <button type="button" class="edsu__x" aria-label="Close" data-edsu-close>&times;</button>
+    <div class="edsu__art" aria-hidden="true">
+      <img src="{{ 'edee-header-primary-1200w.png' | file_url }}" alt="" width="240" height="89" loading="lazy">
+    </div>
+    {%- form 'customer', id: 'edee-signup-form', class: 'edsu__form' -%}
+      <input type="hidden" name="contact[tags]" value="newsletter, welcome-popup">
+      {%- if form.posted_successfully? -%}
+        <p class="edsu__eyebrow">Welcome to Edee Infinity</p>
+        <h2 class="edsu__h" id="edsu-title">Your 10% code</h2>
+        <p class="edsu__code" data-edsu-code>WELCOME10</p>
+        <p class="edsu__p">Enter it at checkout for 10% off your first jewellery order. One use per customer; not valid on loose diamonds.</p>
+        <button type="button" class="edsu__btn" data-edsu-copy>Copy code</button>
+      {%- else -%}
+        <p class="edsu__eyebrow">Join the Edee list</p>
+        <h2 class="edsu__h" id="edsu-title">10% off your first order</h2>
+        <p class="edsu__p">Be first to see new designs, gift ideas and guides to lab-grown diamonds. We'll show your code straight away.</p>
+        {%- if form.errors -%}<p class="edsu__err">{{ form.errors | default_errors }}</p>{%- endif -%}
+        <label class="edsu__lbl" for="edsu-email">Email address</label>
+        <input class="edsu__in" id="edsu-email" type="email" name="contact[email]" autocomplete="email" placeholder="you@example.com" required>
+        <button type="submit" class="edsu__btn">Get my 10% code</button>
+        <p class="edsu__fine">You can unsubscribe at any time. See our <a href="{{ shop.privacy_policy.url | default: '/policies/privacy-policy' }}">privacy policy</a>.</p>
+      {%- endif -%}
+    {%- endform -%}
+  </div>
+</div>
+<style>
+  .edsu { position: fixed; inset: 0; z-index: 2147483100; display: grid; place-items: center; padding: 16px; font-family: Jost, var(--font-body--family, sans-serif); }
+  .edsu[hidden] { display: none; }
+  .edsu__scrim { position: absolute; inset: 0; background: rgba(15,20,25,.55); }
+  .edsu__box { position: relative; width: min(440px, 100%); background: #F5FBFF; color: #0F1419; border-radius: 18px; padding: 30px 26px 24px; text-align: center; box-shadow: 0 30px 70px rgba(0,0,0,.3); animation: edsuIn .35s ease; }
+  @keyframes edsuIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .edsu__x { position: absolute; top: 8px; right: 10px; width: 40px; height: 40px; border: 0; background: none; font-size: 28px; line-height: 1; color: #4a525a; cursor: pointer; }
+  .edsu__art img { width: 170px; height: auto; margin: 0 auto 14px; display: block; }
+  .edsu__eyebrow { margin: 0 0 6px; font-size: 11.5px; letter-spacing: .26em; text-transform: uppercase; color: #9C7A43; }
+  .edsu__h { margin: 0 0 10px; font-weight: 400; font-size: 28px; line-height: 1.2; }
+  .edsu__p { margin: 0 0 16px; font-size: 15px; line-height: 1.55; color: #3a434b; }
+  .edsu__lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .edsu__in { width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; padding: 13px 14px; border: 1px solid #cfd6dc; border-radius: 10px; background: #fff; margin-bottom: 10px; }
+  .edsu__btn { width: 100%; padding: 14px 20px; border: 0; background: #0F1419; color: #fff; font: inherit; font-size: 12.5px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; }
+  .edsu__code { margin: 4px 0 14px; font-size: 30px; letter-spacing: .18em; font-weight: 500; border: 1.5px dashed #C9A66B; border-radius: 10px; padding: 12px; background: #fff; }
+  .edsu__fine { margin: 12px 0 0; font-size: 12px; color: #6b737a; }
+  .edsu__fine a { color: inherit; }
+  .edsu__err { color: #a33; font-size: 14px; }
+  @media print { .edsu { display: none !important; } }
+</style>
+<script>
+  (function () {
+    var el = document.getElementById('edee-signup');
+    if (!el) return;
+    var KEY = 'edee_signup_until', posted = /customer_posted=true/.test(location.search) || el.querySelector('[data-edsu-code]') || el.querySelector('.edsu__err');
+    function get() { try { return Number(localStorage.getItem(KEY) || 0); } catch (e) { return 0; } }
+    function set(days) { try { localStorage.setItem(KEY, String(Date.now() + days * 864e5)); } catch (e) {} }
+    var last = null;
+    function open() {
+      if (!el.hidden) return;
+      last = document.activeElement; el.hidden = false;
+      var f = el.querySelector('input[type=email], [data-edsu-copy], .edsu__x'); if (f) f.focus();
+      cleanup();
+    }
+    function close() { el.hidden = true; set(posted ? 365 : 30); if (last && last.focus) last.focus(); }
+    el.addEventListener('click', function (e) { if (e.target.closest('[data-edsu-close]')) close(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) close(); });
+    var copy = el.querySelector('[data-edsu-copy]');
+    if (copy) copy.addEventListener('click', function () {
+      try { navigator.clipboard.writeText('WELCOME10'); copy.textContent = 'Copied'; } catch (e) {}
+    });
+    var form = el.querySelector('form');
+    if (form) form.addEventListener('submit', function () { set(365); });
+    if (posted) { open(); return; }
+    if (get() > Date.now()) return;
+    var timer = setTimeout(open, 15000);
+    function onScroll() {
+      var h = document.documentElement;
+      if ((h.scrollTop + window.innerHeight) / h.scrollHeight > 0.5) open();
+    }
+    function cleanup() { clearTimeout(timer); window.removeEventListener('scroll', onScroll); }
+    window.addEventListener('scroll', onScroll, { passive: true });
+  })();
+</script>
+{%- endunless -%}

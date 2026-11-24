@@ -1,0 +1,92 @@
+{%- comment -%}
+  Edee Infinity: cart offers.
+  1. Free gift: silver lab-grown diamond studs (DMJE-29, silver/white variant) on orders over A$3,000.
+     Shopify automatic discount "Free diamond studs over $3,000" makes the studs free at checkout.
+  2. Bridal set: 10% off a diamond band bought with an engagement ring (automatic discount "Bridal set").
+  Reads /cart.js and refreshes on Horizon cart updates. Rendered from layout/theme.liquid on the cart template.
+{%- endcomment -%}
+{%- if template.name == 'cart' -%}
+<div class="edco" id="edee-offers" hidden>
+  <div class="edco__gift" data-edco-gift hidden>
+    <p class="edco__msg" data-edco-gift-msg></p>
+    <div class="edco__bar" aria-hidden="true"><span data-edco-bar></span></div>
+    <button type="button" class="edco__btn" data-edco-add hidden>Add my free studs</button>
+  </div>
+  <p class="edco__bridal" data-edco-bridal hidden></p>
+</div>
+<style>
+  .edco { box-sizing: border-box; width: 100%; max-width: 1200px; margin: 8px auto 12px; padding: 0 16px; align-self: stretch; font-family: Jost, var(--font-body--family, sans-serif); color: #0F1419; }
+  .edco__gift, .edco__bridal { border: 1px solid rgba(15,20,25,.1); border-radius: 14px; background: #F5FBFF; padding: 16px 18px; margin: 0 0 10px; }
+  .edco__msg, .edco__bridal { margin: 0; font-size: 15px; line-height: 1.5; }
+  .edco__msg strong, .edco__bridal strong { font-weight: 500; }
+  .edco__bridal a, .edco__msg a { color: #0F1419; }
+  .edco__bar { height: 6px; border-radius: 6px; background: rgba(15,20,25,.08); margin-top: 10px; overflow: hidden; }
+  .edco__bar span { display: block; height: 100%; width: 0; background: #C9A66B; transition: width .4s ease; }
+  .edco__btn { margin-top: 12px; padding: 12px 22px; border: 0; background: #0F1419; color: #fff; font: inherit; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; }
+</style>
+<script>
+  (function () {
+    var GIFT = 50178399568110, MIN = 300000;
+    var box = document.getElementById('edee-offers');
+    if (!box) return;
+    var root = (window.Shopify && Shopify.routes ? Shopify.routes.root : '/');
+    var money = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+    var tagCache = {};
+    function place() {
+      var btn = document.querySelector('main [name="checkout"]');
+      var sec = btn && btn.closest('.shopify-section');
+      if (sec && box.previousElementSibling !== sec) sec.insertAdjacentElement('afterend', box);
+    }
+    function tags(handle) {
+      if (tagCache[handle]) return Promise.resolve(tagCache[handle]);
+      return fetch(root + 'products/' + handle + '.js').then(function (r) { return r.json(); })
+        .then(function (p) { var t = p.tags || []; if (typeof t === 'string') t = t.split(', '); return (tagCache[handle] = t); })
+        .catch(function () { return []; });
+    }
+    function render() {
+      fetch(root + 'cart.js').then(function (r) { return r.json(); }).then(function (c) {
+        place();
+        if (!c.items.length) { box.hidden = true; return; }
+        box.hidden = false;
+        var gift = c.items.filter(function (i) { return i.variant_id === GIFT; })[0];
+        var spend = c.items.reduce(function (s, i) { return s + (i.variant_id === GIFT ? 0 : i.final_line_price); }, 0);
+        var left = MIN - spend;
+        var g = box.querySelector('[data-edco-gift]'), msg = box.querySelector('[data-edco-gift-msg]'), add = box.querySelector('[data-edco-add]');
+        g.hidden = false;
+        box.querySelector('[data-edco-bar]').style.width = Math.min(100, spend / MIN * 100) + '%';
+        add.hidden = true;
+        if (left > 0) {
+          msg.innerHTML = gift
+            ? 'Spend <strong>' + money.format(left / 100) + '</strong> more to make your diamond studs free. Below A$3,000 they are charged at the normal price.'
+            : 'Spend <strong>' + money.format(left / 100) + '</strong> more and get <strong>free lab-grown diamond stud earrings</strong> in sterling silver (our price A$319).';
+        } else if (!gift) {
+          msg.innerHTML = '<strong>You’ve unlocked free lab-grown diamond studs</strong> in sterling silver (our price A$319). Add them and they’ll be free at checkout.';
+          add.hidden = false;
+        } else {
+          msg.innerHTML = '<strong>Your free diamond studs are in your cart.</strong> They show as free at checkout.';
+        }
+        var handles = c.items.map(function (i) { return i.handle; }).filter(function (h, k, a) { return a.indexOf(h) === k; });
+        Promise.all(handles.map(tags)).then(function (all) {
+          var ring = false, band = false;
+          all.forEach(function (t) {
+            var isBand = t.indexOf('style-band') > -1;
+            if (isBand) band = true; else if (t.indexOf('engagement') > -1) ring = true;
+          });
+          var b = box.querySelector('[data-edco-bridal]');
+          if (ring && band) { b.hidden = false; b.innerHTML = '<strong>Bridal set:</strong> 10% off your diamond band is applied at checkout.'; }
+          else if (ring) { b.hidden = false; b.innerHTML = '<strong>Make it a bridal set:</strong> add a <a href="' + root + 'collections/diamond-bands-eternity-rings">matching diamond band</a> and get 10% off the band.'; }
+          else b.hidden = true;
+        });
+      }).catch(function () {});
+    }
+    box.querySelector('[data-edco-add]').addEventListener('click', function (e) {
+      var btn = e.currentTarget; btn.disabled = true; btn.textContent = 'Adding…';
+      fetch(root + 'cart/add.js', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ items: [{ id: GIFT, quantity: 1, properties: { Offer: 'Free gift with orders over A$3,000' } }] }) })
+        .then(function () { location.reload(); })
+        .catch(function () { btn.disabled = false; btn.textContent = 'Add my free studs'; });
+    });
+    document.addEventListener('cart:update', function () { setTimeout(render, 300); });
+    render();
+  })();
+</script>
+{%- endif -%}

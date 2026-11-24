@@ -1,0 +1,18 @@
+{%- comment -%}
+  Edee Infinity: subtle logo mark over product photos on the website only (product pages, product cards).
+  The image files themselves stay clean for Google Shopping, Meta and Pinterest catalogues.
+  Not applied to loose-diamond products (supplier stone photos). Rendered from layout/theme.liquid.
+{%- endcomment -%}
+{%- unless template.name == 'product' and product.type == 'Loose Diamond' -%}
+  <style>
+    .product-media:has(> img.product-media__image) { position: relative; }
+    .product-media:has(> img.product-media__image)::after {
+      content: ""; position: absolute; right: 4%; bottom: 4%; z-index: 1;
+      width: 24%; max-width: 170px; aspect-ratio: 1200 / 444;
+      background: url("{{ 'edee-header-primary-1200w.png' | file_url }}") no-repeat center / contain;
+      opacity: .32; pointer-events: none;
+    }
+    product-card .product-media:has(> img.product-media__image)::after, .product-card .product-media:has(> img.product-media__image)::after { width: 30%; max-width: 110px; opacity: .28; }
+    @media print { .product-media::after { display: none !important; } }
+  </style>
+{%- endunless -%}

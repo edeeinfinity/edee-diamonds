@@ -1,0 +1,25 @@
+{%- comment -%}
+  Edee Infinity: Guides blog list as an even grid of small cards (Horizon's default mixes very large and small posts),
+  and a modest-sized hero image on article pages. Rendered from layout/theme.liquid.
+{%- endcomment -%}
+{%- if template.name == 'blog' -%}
+<style>
+  .blog-posts-container { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 28px 16px !important; }
+  @media (min-width: 750px) { .blog-posts-container { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 36px 24px !important; } }
+  @media (min-width: 1100px) { .blog-posts-container { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; } }
+  .blog-posts-container > .blog-post-item { grid-column: auto !important; grid-row: auto !important; width: auto !important; max-width: none !important; }
+  .blog-post-item .blog-post-card { display: flex !important; flex-direction: column !important; gap: 12px !important; height: 100%; }
+  .blog-post-item .blog-post-card__image-container { width: 100% !important; max-width: none !important; flex: none !important; border-radius: 12px; overflow: hidden; background: #fff; }
+  .blog-post-item .blog-post-card__image { width: 100% !important; height: auto !important; aspect-ratio: 4 / 3 !important; object-fit: cover !important; transition: transform .4s ease; }
+  .blog-post-item:hover .blog-post-card__image { transform: scale(1.04); }
+  .blog-post-item .blog-post-card__content { width: 100% !important; max-width: none !important; padding: 0 !important; flex: 1 !important; }
+  .blog-post-item .blog-post-card__content h2, .blog-post-item .blog-post-card__content h3, .blog-post-item .blog-post-card__content h4,
+  .blog-post-item .blog-post-card__title-link { font-size: 17px !important; line-height: 1.35 !important; }
+  .blog-post-item .blog-post-card__content-text { font-size: 14px !important; line-height: 1.5 !important; }
+</style>
+{%- elsif template.name == 'article' -%}
+<style>
+  [class*="__blog-post-image"] { display: flex !important; justify-content: center; }
+  [class*="__blog-post-image"] img { width: auto !important; max-width: 100% !important; height: auto !important; max-height: 440px !important; object-fit: contain !important; margin: 0 auto; }
+</style>
+{%- endif -%}

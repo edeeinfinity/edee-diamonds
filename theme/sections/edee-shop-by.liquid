@@ -1,0 +1,139 @@
+{%- comment -%}
+  Edee Infinity: "Shop by shape" (diamond outline icons) and "Shop by style" (ring top views) tiles.
+  Each block links to a smart collection built from shape-* / style-* product tags.
+{%- endcomment -%}
+<section class="edsb" id="edsb-{{ section.id }}">
+  <div class="edsb__in">
+    {%- if section.settings.eyebrow != blank -%}<p class="edsb__eyebrow">{{ section.settings.eyebrow }}</p>{%- endif -%}
+    {%- if section.settings.heading != blank -%}<h2 class="edsb__h">{{ section.settings.heading }}</h2>{%- endif -%}
+
+    <h3 class="edsb__sub">{{ section.settings.shape_heading }}</h3>
+    <ul class="edsb__row edsb__row--shapes" role="list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'shape' -%}
+          {%- assign c = block.settings.collection -%}
+          <li class="edsb__shape" {{ block.shopify_attributes }}>
+            <a href="{% if c != blank %}{{ c.url }}{% else %}#{% endif %}">
+              <span class="edsb__icon" aria-hidden="true">
+                {%- case block.settings.shape -%}
+                  {%- when 'round' -%}
+                    <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26"/><polygon points="32,14 44.7,19.3 50,32 44.7,44.7 32,50 19.3,44.7 14,32 19.3,19.3"/><path d="M32 6v8M58 32h-8M32 58v-8M6 32h8M50.4 13.6l-5.7 5.7M50.4 50.4l-5.7-5.7M13.6 50.4l5.7-5.7M13.6 13.6l5.7 5.7"/></svg>
+                  {%- when 'oval' -%}
+                    <svg viewBox="0 0 64 64"><ellipse cx="32" cy="32" rx="19" ry="27"/><ellipse cx="32" cy="32" rx="10" ry="16"/><path d="M32 5v11M32 59V48M13 32h9M51 32h-9M19 13l6 7M45 13l-6 7M19 51l6-7M45 51l-6-7"/></svg>
+                  {%- when 'pear' -%}
+                    <svg viewBox="0 0 64 64"><path d="M32 5C27 16 13 28 13 40a19 19 0 0 0 38 0C51 28 37 16 32 5z"/><path d="M32 18c-3 6-9 13-9 21a9 9 0 0 0 18 0c0-8-6-15-9-21z"/><path d="M32 5v13M13 40h10M51 40H41M32 59V48"/></svg>
+                  {%- when 'emerald' -%}
+                    <svg viewBox="0 0 64 64"><polygon points="21,6 43,6 50,13 50,51 43,58 21,58 14,51 14,13"/><polygon points="25,13 39,13 43,17 43,47 39,51 25,51 21,47 21,17"/><path d="M28 19h8v26h-8z"/></svg>
+                  {%- when 'cushion' -%}
+                    <svg viewBox="0 0 64 64"><rect x="8" y="8" width="48" height="48" rx="14"/><rect x="19" y="19" width="26" height="26" rx="6"/><path d="M12 12l9 9M52 12l-9 9M12 52l9-9M52 52l-9-9"/></svg>
+                  {%- when 'princess' -%}
+                    <svg viewBox="0 0 64 64"><rect x="9" y="9" width="46" height="46"/><path d="M9 9l46 46M55 9L9 55"/><rect x="21" y="21" width="22" height="22" transform="rotate(45 32 32)"/></svg>
+                  {%- when 'marquise' -%}
+                    <svg viewBox="0 0 64 64"><path d="M32 3C14 18 14 46 32 61 50 46 50 18 32 3z"/><path d="M32 17c-7 7-7 23 0 30 7-7 7-23 0-30z"/><path d="M32 3v14M32 61V47M19 32h7M45 32h-7"/></svg>
+                {%- endcase -%}
+              </span>
+              <span class="edsb__label">{{ block.settings.label | default: block.settings.shape | capitalize }}</span>
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+
+    <h3 class="edsb__sub">{{ section.settings.style_heading }}</h3>
+    <ul class="edsb__row edsb__row--styles" role="list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'style' -%}
+          {%- assign c = block.settings.collection -%}
+          {%- assign p = block.settings.product -%}
+          {%- assign img = block.settings.image -%}
+          {%- if img == blank and p != blank -%}
+            {%- for i in p.images -%}
+              {%- if i.src contains '-W-4' -%}{%- assign img = i -%}{%- break -%}{%- endif -%}
+            {%- endfor -%}
+            {%- if img == blank -%}{%- assign img = p.featured_image -%}{%- endif -%}
+          {%- endif -%}
+          <li class="edsb__style" {{ block.shopify_attributes }}>
+            <a href="{% if c != blank %}{{ c.url }}{% else %}#{% endif %}">
+              <span class="edsb__img">
+                {%- if img != blank -%}
+                  {{ img | image_url: width: 500 | image_tag: loading: 'lazy', widths: '240, 360, 500', sizes: '(min-width: 990px) 16vw, 40vw', alt: block.settings.label }}
+                {%- endif -%}
+              </span>
+              <span class="edsb__label">{{ block.settings.label }}</span>
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+<style>
+  #edsb-{{ section.id }} { background: {{ section.settings.bg }}; color: #0F1419; font-family: Jost, var(--font-body--family, sans-serif); }
+  #edsb-{{ section.id }} .edsb__in { max-width: 1240px; margin: 0 auto; padding: 56px 20px 64px; text-align: center; }
+  #edsb-{{ section.id }} .edsb__eyebrow { margin: 0 0 8px; font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: #9C7A43; }
+  #edsb-{{ section.id }} .edsb__h { margin: 0 0 28px; font-weight: 400; font-size: clamp(26px, 3.2vw, 38px); letter-spacing: .01em; }
+  #edsb-{{ section.id }} .edsb__sub { margin: 18px 0 16px; font-weight: 500; font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: #4a525a; }
+  #edsb-{{ section.id }} .edsb__row { list-style: none; margin: 0 0 18px; padding: 0; display: flex; gap: 14px; justify-content: center; }
+  #edsb-{{ section.id }} .edsb__row a { display: flex; flex-direction: column; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+  #edsb-{{ section.id }} .edsb__shape { flex: 0 0 104px; }
+  #edsb-{{ section.id }} .edsb__icon { width: 84px; height: 84px; border-radius: 50%; background: #fff; border: 1px solid rgba(15,20,25,.1); display: grid; place-items: center; transition: border-color .2s, transform .2s, box-shadow .2s; }
+  #edsb-{{ section.id }} .edsb__icon svg { width: 48px; height: 48px; fill: none; stroke: #0F1419; stroke-width: 1.3; stroke-linejoin: round; stroke-linecap: round; }
+  #edsb-{{ section.id }} .edsb__style { flex: 0 0 calc((100% - 70px) / 6); }
+  #edsb-{{ section.id }} .edsb__img { display: block; width: 100%; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #fff; border: 1px solid rgba(15,20,25,.08); transition: border-color .2s, transform .2s, box-shadow .2s; }
+  #edsb-{{ section.id }} .edsb__img img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.12); }
+  #edsb-{{ section.id }} .edsb__label { font-size: 15px; letter-spacing: .02em; }
+  #edsb-{{ section.id }} a:hover .edsb__icon, #edsb-{{ section.id }} a:focus-visible .edsb__icon,
+  #edsb-{{ section.id }} a:hover .edsb__img, #edsb-{{ section.id }} a:focus-visible .edsb__img { border-color: #C9A66B; transform: translateY(-3px); box-shadow: 0 10px 24px rgba(15,20,25,.08); }
+  @media (max-width: 989px) {
+    #edsb-{{ section.id }} .edsb__in { padding: 40px 0 44px; }
+    #edsb-{{ section.id }} .edsb__h, #edsb-{{ section.id }} .edsb__eyebrow { padding: 0 16px; }
+    #edsb-{{ section.id }} .edsb__row { justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 16px 10px; gap: 12px; scrollbar-width: none; }
+    #edsb-{{ section.id }} .edsb__row::-webkit-scrollbar { display: none; }
+    #edsb-{{ section.id }} .edsb__row > li { scroll-snap-align: start; }
+    #edsb-{{ section.id }} .edsb__shape { flex-basis: 84px; }
+    #edsb-{{ section.id }} .edsb__icon { width: 72px; height: 72px; }
+    #edsb-{{ section.id }} .edsb__icon svg { width: 40px; height: 40px; }
+    #edsb-{{ section.id }} .edsb__style { flex-basis: 38%; }
+    #edsb-{{ section.id }} .edsb__label { font-size: 14px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Edee shop by shape & style",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Find your ring" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop engagement rings by shape and style" },
+    { "type": "text", "id": "shape_heading", "label": "Shape row heading", "default": "Shop by shape" },
+    { "type": "text", "id": "style_heading", "label": "Style row heading", "default": "Shop by style" },
+    { "type": "color", "id": "bg", "label": "Background", "default": "#F5FBFF" }
+  ],
+  "blocks": [
+    {
+      "type": "shape",
+      "name": "Shape",
+      "settings": [
+        { "type": "select", "id": "shape", "label": "Shape icon", "options": [
+          { "value": "round", "label": "Round" }, { "value": "oval", "label": "Oval" }, { "value": "pear", "label": "Pear" },
+          { "value": "emerald", "label": "Emerald" }, { "value": "cushion", "label": "Cushion" }, { "value": "princess", "label": "Princess" },
+          { "value": "marquise", "label": "Marquise" } ], "default": "round" },
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "collection", "id": "collection", "label": "Collection" }
+      ]
+    },
+    {
+      "type": "style",
+      "name": "Style",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "product", "id": "product", "label": "Product for the picture (uses its top view)" },
+        { "type": "image_picker", "id": "image", "label": "Or upload a picture" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Edee shop by shape & style" }]
+}
+{% endschema %}

@@ -1,0 +1,131 @@
+{%- comment -%}
+  Edee Infinity: "You may also like" on product pages.
+  Shows pieces from the same category as the current product (women's rings with women's rings,
+  men's rings with men's rings, earrings with earrings, ...), closest in price first.
+  Priced pieces are matched with priced pieces and "price on request" pieces with each other first.
+  Replaces Shopify's automatic recommendations, which mixed categories while the store has no sales history.
+{%- endcomment -%}
+{%- liquid
+  assign cur = product
+  assign t = cur.type
+  assign is_men = false
+  if cur.title contains "Men's"
+    assign is_men = true
+  endif
+  case t
+    when 'Rings'
+      if is_men
+        assign col_handle = 'mens-rings'
+      else
+        assign col_handle = 'womens-rings'
+      endif
+    when 'Bracelets'
+      if is_men
+        assign col_handle = 'mens-jewellery'
+      else
+        assign col_handle = 'womens-bracelets'
+      endif
+    when 'Earrings'
+      assign col_handle = 'earrings'
+    when 'Pendants'
+      assign col_handle = 'pendants'
+    when 'Nose Pins'
+      assign col_handle = 'nose-pins'
+    else
+      assign col_handle = ''
+  endcase
+
+  assign cur_por = false
+  if cur.price == 0 or cur.tags contains 'Price on request'
+    assign cur_por = true
+  endif
+  assign limit = section.settings.limit
+-%}
+
+{%- if col_handle != '' -%}
+  {%- assign col = collections[col_handle] -%}
+  {%- capture keys -%}
+    {%- paginate col.products by 250 -%}
+      {%- for p in col.products -%}
+        {%- if p.id == cur.id -%}{%- continue -%}{%- endif -%}
+        {%- liquid
+          assign p_por = false
+          if p.price == 0 or p.tags contains 'Price on request'
+            assign p_por = true
+          endif
+          assign d = p.price | minus: cur.price | abs
+          if p_por != cur_por
+            assign d = d | plus: 1000000000
+          endif
+          assign d = d | plus: 10000000000 | append: ''
+        -%}
+        {{ d }}|{{ p.handle }},
+      {%- endfor -%}
+    {%- endpaginate -%}
+  {%- endcapture -%}
+  {%- assign picks = keys | split: ',' | sort -%}
+
+  {%- if picks.size > 0 -%}
+  <section class="eds-sim" aria-labelledby="eds-sim-h-{{ section.id }}">
+    <div class="eds-sim__wrap">
+      <div class="eds-sim__head">
+        <h2 id="eds-sim-h-{{ section.id }}">{{ section.settings.heading }}</h2>
+        <a href="{{ col.url }}">View all {{ col.title | downcase }}</a>
+      </div>
+      <div class="eds-sim__cards">
+        {%- for k in picks limit: limit -%}
+          {%- assign h = k | split: '|' | last -%}
+          {%- assign p = all_products[h] -%}
+          {%- if p == empty or p == nil -%}{%- continue -%}{%- endif -%}
+          <a class="eds-sim__card" href="{{ p.url }}">
+            <div class="eds-sim__img">
+              {%- if p.featured_image -%}{{ p.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: p.featured_image.alt | default: p.title, sizes: '(min-width: 1100px) 25vw, (min-width: 750px) 33vw, 46vw' }}{%- endif -%}
+            </div>
+            <div class="eds-sim__title">{{ p.title }}</div>
+            <div class="eds-sim__price">
+              {%- if p.price == 0 or p.tags contains 'Price on request' -%}Price on request
+              {%- elsif p.price_varies -%}From {{ p.price_min | money }}
+              {%- else -%}{{ p.price | money }}{%- endif -%}
+            </div>
+          </a>
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+  {%- endif -%}
+{%- endif -%}
+
+<style>
+  .eds-sim { padding: 48px 0 56px; }
+  .eds-sim__wrap { max-width: var(--page-width, 1400px); margin: 0 auto; padding: 0 var(--page-margin, 20px); }
+  .eds-sim__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+  .eds-sim__head h2 { margin: 0; font-size: 22px; font-weight: 400; letter-spacing: .02em; }
+  .eds-sim__head a { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 4px; white-space: nowrap; }
+  .eds-sim__cards { display: grid; grid-auto-flow: column; grid-auto-columns: 46%; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 10px; scrollbar-width: thin; }
+  @media (min-width: 750px) { .eds-sim__cards { grid-auto-columns: calc(33.333% - 14px); gap: 20px; } }
+  @media (min-width: 1100px) { .eds-sim__cards { grid-auto-columns: calc(25% - 15px); } }
+  .eds-sim__card { scroll-snap-align: start; text-decoration: none; color: inherit; text-align: center; }
+  .eds-sim__img { background: #fff; aspect-ratio: 1 / 1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .eds-sim__img img { width: 100%; height: 100%; object-fit: contain; transition: transform .6s ease; }
+  .eds-sim__card:hover .eds-sim__img img { transform: scale(1.04); }
+  .eds-sim__title { font-size: 15px; line-height: 1.4; margin: 12px 0 6px; }
+  .eds-sim__price { font-size: 16px; font-weight: 500; }
+  @media (max-width: 749px) {
+    .eds-sim { padding: 32px 0 40px; }
+    .eds-sim__head h2 { font-size: 19px; }
+    .eds-sim__title { font-size: 14px; }
+    .eds-sim__price { font-size: 15px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Edee similar products",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "You may also like" },
+    { "type": "range", "id": "limit", "label": "Products to show", "min": 4, "max": 12, "step": 1, "default": 8 }
+  ],
+  "presets": [{ "name": "Edee similar products" }],
+  "enabled_on": { "templates": ["product"] }
+}
+{% endschema %}

@@ -31,6 +31,7 @@
       assign col_handle = 'pendants'
     when 'Nose Pins'
       assign col_handle = 'nose-pins'
+      assign fill_handle = 'womens-rings'
     else
       assign col_handle = ''
   endcase
@@ -44,6 +45,7 @@
 
 {%- if col_handle != '' -%}
   {%- assign col = collections[col_handle] -%}
+  {%- comment -%} Categories with few pieces (nose pins) are topped up from a second collection, listed after their own pieces. {%- endcomment -%}
   {%- capture keys -%}
     {%- paginate col.products by 250 -%}
       {%- for p in col.products -%}
@@ -63,6 +65,28 @@
       {%- endfor -%}
     {%- endpaginate -%}
   {%- endcapture -%}
+  {%- if fill_handle != blank -%}
+    {%- assign fcol = collections[fill_handle] -%}
+    {%- capture fkeys -%}
+      {%- paginate fcol.products by 250 -%}
+        {%- for p in fcol.products -%}
+          {%- liquid
+            assign p_por = false
+            if p.price == 0 or p.tags contains 'Price on request'
+              assign p_por = true
+            endif
+            assign d = p.price | minus: cur.price | abs
+            if p_por != cur_por
+              assign d = d | plus: 1000000000
+            endif
+            assign d = d | plus: 12000000000 | append: ''
+          -%}
+          {{ d }}|{{ p.handle }},
+        {%- endfor -%}
+      {%- endpaginate -%}
+    {%- endcapture -%}
+    {%- assign keys = keys | append: fkeys -%}
+  {%- endif -%}
   {%- assign picks = keys | split: ',' | sort -%}
 
   {%- if picks.size > 0 -%}
